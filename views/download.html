@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Download</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js" ></script>
+    </head>
+    <body>
+        <script>
+            $(function() {
+                var checkDone = function () {
+                    $.get( "http://localhost:8080/image_sets/"+{{.Path}}+"/IsDone", function( data ) {
+                        console.log(data);
+                        if( data == "false" ){
+                            setTimeout(function(){
+                                checkDone()
+                            }, 1000);  
+                        } else {
+                            document.getElementById('progress').innerHTML = "Your files are ready!";
+                            document.getElementById("downloadBtn").disabled = false;
+                        }
+                    });
+                }
+
+                checkDone();
+            });
+        </script>
+        <div style="margin: 200px 250px 100px 80px;">
+            <h2 id="progress">Processing...</h2>
+            <form method="GET" action='/{{.URL}}'>
+                <button id="downloadBtn" style="margin-left:2.5em; margin-top:.2em;" class="btn btn-default" type="submit" disabled>Download</button>
+            </form>
+        </div>
+    </body>
+</html>
