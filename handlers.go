@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	//"strconv"
-	//"github.com/gorilla/mux"
 )
 
 type Metadata struct {
@@ -22,6 +20,8 @@ type Metadata struct {
 }
 
 const MAX_VIDEO_SIZE int64 = 10000000
+const FILE_TYPE_ERR string = "1"
+const FILE_SIZE_ERR string = "2"
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.URL.RawQuery, "=") {
@@ -30,9 +30,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		var meta *Metadata
 
-		if error_num[0] == "1" {
+		if error_num[0] == FILE_TYPE_ERR {
 			meta = &Metadata{Error: "Incorrect file type"}
-		} else if error_num[0] == "2" {
+		} else if error_num[0] == FILE_SIZE_ERR {
 			meta = &Metadata{Error: "File size too large"}
 		} else {
 			http.Redirect(w, r, "/", 301)
@@ -55,6 +55,7 @@ func ConvertVideoToImage(w http.ResponseWriter, r *http.Request) {
 	file, handler, err := r.FormFile("uploadfile")
 	if err != nil {
 		fmt.Println(err)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 	defer file.Close()
@@ -70,6 +71,7 @@ func ConvertVideoToImage(w http.ResponseWriter, r *http.Request) {
 		tempDirName, err := ioutil.TempDir("temps", "video")
 		if err != nil {
 			os.Remove(tempDirName)
+			http.Error(w, err.Error(), 500)
 			return
 		}
 
@@ -80,6 +82,7 @@ func ConvertVideoToImage(w http.ResponseWriter, r *http.Request) {
 		f, err := os.OpenFile("./temps/"+setId+"/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fmt.Println(err)
+			http.Error(w, err.Error(), 500)
 			return
 		}
 
@@ -134,18 +137,20 @@ func CheckIfDone(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode("true"); err != nil {
-			panic(err)
+			http.Error(w, err.Error(), 500)
+			return
 		}
-		return
 	} else {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode("false"); err != nil {
-			panic(err)
+			http.Error(w, err.Error(), 500)
+			return
 		}
-		return
 	}
+
+	return
 }
 
 func CheckIfValidFileType(contentType string) bool {
