@@ -209,13 +209,13 @@ func VideoToImage(dir, filename string, c chan<- string) {
 		}
 		Release(packet)
 	}
-	fmt.Println("Compressing...")
-	Zip("./temps/"+dir, "./temps/"+dir+".zip")
-	fmt.Println("Done")
-
 	close(dataChan)
 
 	wg.Wait()
+
+	fmt.Println("Compressing...")
+	Zip("./temps/"+dir, "./temps/"+dir+".zip")
+	fmt.Println("Done")
 
 	c <- fmt.Sprintf("%s: %s\n", "VideoToImage", "Done")
 }
