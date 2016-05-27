@@ -96,7 +96,7 @@ func ConvertVideoToImage(w http.ResponseWriter, r *http.Request) {
 		//Create safe url
 		url := "image_sets/" + setId
 		var meta = &Metadata{URL: url}
-		
+
 		//Run goroutine for image extraction
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		wg.Add(1)
