@@ -9,4 +9,4 @@
 * Dependencies
   * go get github.com/gorilla/mux
   * go get github.com/3d0c/gmf
-
+  * go get github.com/unrolled/secure
