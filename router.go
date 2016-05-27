@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
+	"html/template"
 	"net/http"
 )
 
@@ -39,6 +40,14 @@ func NewRouter() *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 	}
+
+	var notFoundHandler http.Handler
+	notFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t, _ := template.ParseFiles("views/404.html")
+		t.Execute(w, nil)
+	})
+
+	router.NotFoundHandler = notFoundHandler
 
 	return router
 }
