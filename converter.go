@@ -174,7 +174,7 @@ func Zip(source, target string) error {
 	return err
 }
 
-func VideoToImage(dir, filename string, c chan<- string) {
+func VideoToImage(dir, filename string) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	srcFileName := "./temps/" + dir + "/" + filename
@@ -184,7 +184,6 @@ func VideoToImage(dir, filename string, c chan<- string) {
 
 	srcVideoStream, err := inputCtx.GetBestStream(AVMEDIA_TYPE_VIDEO)
 	if err != nil {
-		c <- fmt.Sprintf("%s: %s\n", "VideoToImage", err)
 		log.Println("No video stream found in", srcFileName)
 	}
 
@@ -216,6 +215,4 @@ func VideoToImage(dir, filename string, c chan<- string) {
 	fmt.Println("Compressing...")
 	Zip("./temps/"+dir, "./temps/"+dir+".zip")
 	fmt.Println("Done")
-
-	c <- fmt.Sprintf("%s: %s\n", "VideoToImage", "Done")
 }

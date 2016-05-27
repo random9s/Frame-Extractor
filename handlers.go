@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
+	"sync"
 )
 
 type Metadata struct {
@@ -22,6 +24,8 @@ type Metadata struct {
 const MAX_VIDEO_SIZE int64 = 10000000
 const FILE_TYPE_ERR string = "1"
 const FILE_SIZE_ERR string = "2"
+
+var wg sync.WaitGroup
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.URL.RawQuery, "=") {
@@ -93,8 +97,14 @@ func ConvertVideoToImage(w http.ResponseWriter, r *http.Request) {
 		url := "image_sets/" + setId
 		var meta = &Metadata{URL: url}
 
-		c := make(chan string)
-		go VideoToImage(setId, handler.Filename, c)
+		runtime.GOMAXPROCS(runtime.NumCPU())
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			VideoToImage(setId, handler.Filename)
+		}()
 
 		t, _ := template.ParseFiles("views/imageSets.html")
 		t.Execute(w, meta)
